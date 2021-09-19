@@ -1,0 +1,277 @@
+@keyframes typing {
+  from {width: 0}
+  to {width: 100%}
+}
+#lbl {
+display: inline-block;
+width: 5px;
+height: 5px;
+position: relative;
+top: -23px;
+left:0;
+}
+#switch_languages {
+position:relative;
+top: 8px;
+}
+#switch_themes {
+position:absolute;
+background:#FAF9F6;
+margin: -78px 2em 0 auto;
+width: 1400px;
+height: 50px;
+z-index: 0;
+top: 281px;
+left: 0;
+}
+input[type="checkbox"] {
+-webkit-appearance: none;
+}
+.check {
+position:relative;
+display:block;
+width:40px;
+height:20px;
+background:#123456;
+cursor:pointer;
+border-radius:20px;
+overflow:hidden;
+transition: ease-in 0.5s;
+line-height: 10px;
+}
+input[type="checkbox"]:checked ~ .check {
+background:#FAF9F6;
+box-shadow: 0 0 0 6000px #123456;
+}
+.check:before {
+content: '';
+position:absolute;
+top:2px;
+left: 2px;
+background:#FAF9F6;
+width:16px;
+height:16px;
+border-radius:50%;
+transition: 0.5s;
+}
+input[type="checkbox"]:checked ~ .check:before {
+transform: translateX(-50px);
+}
+.check:after {
+content: '';
+position:absolute;
+top:2px;
+right: 2px;
+background:#123456;
+width:16px;
+height:16px;
+border-radius:50%;
+transform: translateX(50px);
+}
+input[type="checkbox"]:checked ~ .check:after {
+transform: translateX(0px);
+}
+#coronavirus_information {
+height: 300px;
+top:200px;
+width:1300px;;
+padding: 150px;
+right:10px;
+margin: 160px 0 0 auto;
+z-index: 1;
+color: #A3C6C4;
+}
+#english_text_aside {
+position:relative;
+z-index: 1;
+height: 382px;
+background: black;
+top: -76px;
+left: -10px;
+width: 555px;
+background: #E0E7E9;
+}
+@keyframes black_to_red {
+from {color: black;}
+to {color: red;}
+}
+#english_text {
+color: black;
+position:absolute;
+z-index:0 ;
+height: 500px;
+top:300px; left: 9.5px;
+border-radius:15%;
+width:375px;
+}
+@keyframes black_to_blue {
+from {color: black;}
+to {color: blue;}
+}
+#coronavirus_statistics {
+position:relative;
+z-index:1;
+font-size: 25px;
+left: 555px;
+top: -251px;
+background:#A3C6C4;
+width: 1106px;
+height: 383px;
+}
+#telegram_bot {
+position: relative;
+z-index: 1;
+margin: 50px 0 0 auto;
+background: #433E49;
+width: 100%;
+left: 80px;
+border-radius: 10%;
+box-shadow: 10px 5px 5px black;
+font-family: 'Palatino';
+}
+.del_container {
+font-size:18px;
+text-decoration: none;
+white-space: nowrap;
+animation-name : typing;
+animation-duration: 3s;
+}
+del {
+background: #000;
+color: #000;
+font-size: 18px;
+text-decoration:none;
+}
+del:hover {
+color: #fff;
+font-size: 18px;
+width: 500px;
+}
+#screen_english {
+position: relative;
+z-index: 1;
+left: -140px;
+top: -0;
+border-radius:3%;
+cursor: move;
+}
+#screen_english:hover {
+-webkit-transform: scale(1.2);
+-ms-transform: scale(1.2);
+transform: scale(1.2);
+}
+#screen_russian {
+position: relative;
+z-index: 1;
+left: 140px;
+top: 0;
+border-radius:3%;
+cursor: move;
+}
+#screen_russian:hover {
+-webkit-transform: scale(1.2);
+-ms-transform: scale(1.2);
+transform: scale(1.2);
+}
+#bot_description_english {
+color:white;
+font-size:20px;
+white-space: nowrap;
+animation-name: typing;
+animation-duration:3s;
+}
+#bot_description_russian {
+color: white;
+white-space: nowrap;
+animation-name: typing;
+animation-duration:3s;
+font-size: 20px;
+}
+#upper_menu {
+margin: 0 0 0 auto;
+background:white;
+position:fixed;
+color:black;
+width: 100%;
+top: 0;
+z-index:2;
+box-sizing: border-box;
+}
+button {
+border-radius: 20px;
+margin: 9px 2em 0 auto;
+border:none;
+background-color: white;
+}
+header {
+color: white;
+}
+video {
+position:absolute;
+top: 600px; left: 328px;
+z-index:0;
+}
+video::-webkit-media-controls {
+    display:none !important;
+}
+#base {
+max-width:1505px;
+min-width:1505px;
+background : #FAF9F6;
+font-family: 'Didact Gothic'
+}
+#div_updates {
+color: #aaa;
+position: relative;
+z-index: 0;
+}
+#main_button {
+position: relative;
+z-index: 1;
+top: -140px;
+left: -10px;
+display: inline-block;
+border-radius: 20px;
+background-color: #E2495B;
+border: none;
+color: #FFFFFF;
+text-align: center;
+font-size: 28px;
+padding: 20px;
+width: 200px;
+height: 50px;
+transition: all 0.5s;
+margin: -15px;
+}
+#main_button:hover {
+box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
+.button span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.button span:after {
+  content: '\00bb';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  top: -5px;
+  transition: 0.5s;
+}
+
+.button:hover span {
+  padding-right: 25px;
+}
+
+.button:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+#link_to_telegram_bot {
+width: 200px;
+height: 82px;
+}
