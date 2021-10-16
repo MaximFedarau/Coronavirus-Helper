@@ -10,56 +10,185 @@ def similar(a, b):
 
 users_language = 0 #varibale, which i use to define users's language
 bot = telebot.TeleBot(config.TOKEN)
-
+def set_native_language(language_code):
+    global users_language
+    users_language_code = language_code
+    if users_language_code == "ru":
+        users_language = 1
+    else:
+        users_language = 0
 #start command
 @bot.message_handler(commands = ['start'])
 def start(message):
     global users_language#text depends on users's language. By default it's English
+    set_native_language(message.from_user.language_code)
     if users_language == 0:
-        bot.send_message(message.chat.id,"Hello!")
-        bot.send_message(message.chat.id,"Choose /language to choose your language. And use /help to get the list of commands. \nIf you have any troubles use /author to get author's contacts.")
+        bot.send_message(message.chat.id,f"Hello, {message.from_user.first_name}!")
+        bot.send_message(message.chat.id,"If you have any troubles use /author to get author's contacts.")
     else:
-        bot.send_message(message.chat.id, "Привет!")
-        bot.send_message(message.chat.id, "Используй /language,чтобы выбрать свой язык. И используй /help,чтобы получить список комманд. \nЕcли у Вас возникли какие-либо проблемы, тогда используйте /author, чтобы получить контакты автора.")
-
-#get the list of commands
-@bot.message_handler(commands=['help'])
-def help(message):
+        bot.send_message(message.chat.id, f"Привет, {message.from_user.first_name}!")
+        bot.send_message(message.chat.id, "Еcли у Вас возникли какие-либо проблемы, тогда используйте /author, чтобы получить контакты автора.")
+@bot.message_handler(commands=['geo'])
+def geo(message):
+    set_native_language(message.from_user.language_code)
+    geo_keyboard=types.ReplyKeyboardMarkup(resize_keyboard=True)
+    geo_yes = types.KeyboardButton(text="☑️",request_location=True)
+    geo_no = types.KeyboardButton(text="❌")
+    geo_keyboard.add(geo_yes,geo_no)
     if users_language==0:
-        bot.send_message(message.chat.id,"/language -- set your native language \n/vaccine -- get the list of places in your region, where you can made a vaccine (only in Belarus) \n/stat -- get statistics of coronavirus cases around the world \n/help -- get the full list of commands \n/author -- get author's contacts")
+        bot.send_message(message.from_user.id,"Input your geoposition.",reply_markup=geo_keyboard)
     else:
-        bot.send_message(message.chat.id, "/language -- установить свой родной язык \n/vaccine -- получить список мест в вашей области, где Вы можете сделать вакцину (только в Беларуси) \n/stat -- получить статистику по коронавирусу по всему миру \n/help --  получить полный список комманд \n/author -- получить контакты автора")
-
-#change language
-@bot.message_handler(commands=['language'])
-def language(message):
-    global users_language
-    lang_keyboard = types.InlineKeyboardMarkup()
-    en_button = types.InlineKeyboardButton(text="English", callback_data="english")
-    rus_button = types.InlineKeyboardButton(text="Русский", callback_data="russian")
-    lang_keyboard.add(en_button, rus_button)
-    if users_language==0:
-        bot.send_message(message.chat.id, "Choose your language.",reply_markup=lang_keyboard)
-    else:
-        bot.send_message(message.chat.id, "Выберите свой язык.",reply_markup=lang_keyboard)
-
-    @bot.callback_query_handler(func = lambda lang_call: lang_call.data in ["english","russian"])
-    def lang_callback(lang_call):
-        global users_language
-        if lang_call.data=="english":
-            users_language = 0
+        bot.send_message(message.from_user.id, "Введите Вашу геопозицию.", reply_markup=geo_keyboard)
+    bot.register_next_step_handler(message,geo_continue)
+def geo_continue(message):
+    if message.location!=None:
+        from geopy import Nominatim
+        global locator
+        locator = Nominatim(user_agent="myGeocoder")
+        global users_latitude,users_longitude
+        users_latitude = message.location.latitude
+        users_longitude = message.location.longitude
+        users_geo_data = locator.reverse(f"{message.location.latitude}, {message.location.longitude}",language="ru").raw#53.9024716 27.5618225
+        users_country_code = users_geo_data['address']['country_code']
+        if users_country_code=="by":
+            region_keyboard = types.ReplyKeyboardMarkup()
+            brest_region_button = types.KeyboardButton(text="Брестская область")
+            vitebsk_region_button = types.KeyboardButton(text="Витебская область")
+            gomel_region_button = types.KeyboardButton(text="Гомельская область")
+            hrodna_region_button = types.KeyboardButton(text="Гродненская область")
+            minsk_region_button = types.KeyboardButton(text="Минская область")
+            mogilev_region_button = types.KeyboardButton(text="Могилевская область")
+            minsk_button = types.KeyboardButton(text="г. Минск")
+            region_keyboard.add(brest_region_button, vitebsk_region_button, gomel_region_button)
+            region_keyboard.add(hrodna_region_button, minsk_region_button, mogilev_region_button)
+            region_keyboard.add(minsk_button)
+            if users_language==0:
+                bot.send_message(message.chat.id,"Choose your region.",reply_markup=region_keyboard)
+            else:
+                bot.send_message(message.chat.id, "Выберите Вашу область.", reply_markup=region_keyboard)
+            bot.register_next_step_handler(message,geo_continue_1)
         else:
-            users_language = 1
+            if users_language==0:
+                bot.send_message(message.chat.id,"Sorry, this function works only in Belarus, yet.")
+            else:
+                bot.send_message(message.chat.id, "Извините, эта функция работает пока только в Беларуси.")
+            non_keyboard = types.ReplyKeyboardRemove(selective=False)
+            bot.send_message(message.chat.id, "Ok.", reply_markup=non_keyboard)
+    else:
+        non_keyboard = types.ReplyKeyboardRemove(selective=False)
+        bot.send_message(message.chat.id, "Ok.", reply_markup=non_keyboard)
+def geo_continue_1(message):
+    global locator, users_latitude, users_longitude
+    regions_list = ["Брестская область","Витебская область","Гомельская область","Гродненская область","Минская область","Могилевская область","г. Минск"]
+    non_keyboard = types.ReplyKeyboardRemove(selective=False)
+    bot.send_message(message.chat.id, "Ok.", reply_markup=non_keyboard)
+    if message.text in regions_list:
+        if message.text=="г. Минск":
+            pass#смотрим по районам
+        else:
+            import numpy as np
+            places_list = np.array([])
+            cities_list = np.array([])
+            if message.text=="Гродненская область":
+                cities_list = np.array(["Гродно","Большая Берестовица","Волковыск","Вороново, Беларусь","Дятлово","Зельва","Ивье",'Лида, Беларусь',"Радунь","Кореличи","Мосты, Гродненская область, Беларусь","Новогрудок","Островец","Ошмяны","Свислочь","Щучин, Беларусь","Сморгонь","Слоним"])
+                places_list = np.array([["Центральная городская поликлиника, Гродно","Городская поликлиника №3, Гродно","Городская поликлиника №4, Гродно","Городская поликлиника №5, Гродно","Городская поликлиника №6, Гродно","Городская поликлиника №7, Гродно"],["Берестовицкая центральная районная больница, Большая Берестовица"],["Центральная районная больница, Волковыск"],["Вороновская центральная районная больница, Вороново"],
+                                        ["Дятловская центральная районная больница, Дятлово"],["Зельвенская центральная районная больница, Зельва"],["Ивьевская центральная районная больница,Ивье"],["Лидская центральная районная больница, Лида", "Городская поликлиника №1, Лида"],["Радунь"],
+                                        ["Кореличи"],["Центральная районная больница, Мосты, Гродненская область"],["Новогрудская ЦРБ, Новогрудок"],["Островец"],["Ошмянская центральная районная больница, Ошмяны"],["Свислочская Центральная районная больница, Свислочь"],["Щучинская центральная районная больница, Щучин"],["Сморгонская Центральная районная больница, Сморгонь"],["Слонимская центральная районная больница, Слоним"]])
+            elif message.text=="Могилевская область":
+                cities_list = np.array(["Белыничи","Быхов","Глуск","Горки, Беларусь","Дрибин","Кировск, Беларусь","Климовичи","Кличев, Беларусь","Костюковичи","Краснополье, Беларусь","Кричев","Круглое, Беларусь","Мстиславль","Осиповичи","Славгород, Беларусь","Хоцімск","Чаусы","Чериков","Шклов","Могилев"])
+                places_list = np.array([["Белыничская центральная районная больница, Белыничи"],["Быховская центральная районная больница, Быхов"],["Глусская ЦРБ, Глуск"],["Горецкая центральная районная больница, Горки , Беларусь"],["Поликлиника, Дрибин"],["ЦРБ, Кировск, Беларусь"],["Климовическая районная поликлиника, Климовичи"],["Районная больница, Кличев, Беларусь"],["Больница, Костюковичи"],["ЦРБ, Краснополье, Беларусь"]
+                                           ,["Кричевская Цетральная Районная Больница, Кричев, Беларусь"],["Круглянская больница, Круглое, Беларусь"],["Мстиславльская центральная районная больница, Мстиславль"],["Осиповичская центральная районная больница, Осиповичи"],["Славгород, Беларусь"],["Хотимская центральная районная больница, Хоцімск"],["Отделение Скорой Медицинской Помощи, Чаусы"],["Чериковская центральная районная больница, Чериков"],
+                                        ["""УЗ "Шкловская ЦРБ", Шклов"""],[""]])
+            else:
+                cities_list = np.array(
+                    ["Гродно", "Большая Берестовица", "Волковыск", "Вороново, Беларусь", "Дятлово", "Зельва", "Ивье",
+                     'Лида, Беларусь', "Радунь", "Кореличи", "Мосты, Гродненская область, Беларусь", "Новогрудок",
+                     "Островец", "Ошмяны", "Свислочь", "Щучин, Беларусь", "Сморгонь", "Слоним"])
+                places_list = np.array([["Центральная городская поликлиника, Гродно",
+                                         "Городская поликлиника №3, Гродно", "Городская поликлиника №4, Гродно",
+                                         "Городская поликлиника №5, Гродно", "Городская поликлиника №6, Гродно",
+                                         "Городская поликлиника №7, Гродно"],
+                                        ["Берестовицкая центральная районная больница, Большая Берестовица"],
+                                        ["Центральная районная больница, Волковыск"],
+                                        ["Вороновская центральная районная больница, Вороново"],
+                                        ["Дятловская центральная районная больница, Дятлово"],
+                                        ["Зельвенская центральная районная больница, Зельва"],
+                                        ["Ивьевская центральная районная больница,Ивье"],
+                                        ["Лидская центральная районная больница, Лида",
+                                         "Городская поликлиника №1, Лида"], ["Радунь"],
+                                        ["Кореличи"], ["Центральная районная больница, Мосты, Гродненская область"],
+                                        ["Новогрудская ЦРБ, Новогрудок"], ["Островец"],
+                                        ["Ошмянская центральная районная больница, Ошмяны"],
+                                        ["Свислочская Центральная районная больница, Свислочь"],
+                                        ["Щучинская центральная районная больница, Щучин"],
+                                        ["Сморгонская Центральная районная больница, Сморгонь"],
+                                        ["Слонимская центральная районная больница, Слоним"]])
+            cities_ans_dist = 10000.0
+            cities_ans_name=2
+            if users_language == 0:
+                bot.send_message(message.chat.id, f"We are finding closest to you city -- about {len(cities_list)} seconds.")
+            else:
+                bot.send_message(message.chat.id, f"Мы ищем ближайший к Вам город -- около {len(cities_list)} секунд.")
+            users_data = (users_latitude, users_longitude)
+            for i in np.arange(0,len(cities_list),1):
+                users_city = cities_list[i]
+                chosen_city_data = locator.geocode(users_city)
+                users_city_latitude = chosen_city_data.latitude
+                users_city_longitude = chosen_city_data.longitude
+                city_data = (users_city_latitude,users_city_longitude)
+                from geopy import distance
+                city_distance_data = distance.distance(city_data, users_data)
+                if city_distance_data<cities_ans_dist:
+                    cities_ans_name=i
+                    cities_ans_dist = city_distance_data
+            places_list = places_list[cities_ans_name]
+            ans_dist = 10 ** 5.0
+            ans_latitude = 0.0
+            ans_longitude = 0.0
+            if users_language==0:
+                bot.send_message(message.chat.id, f"Please wait about {len(places_list)} seconds.")
+            else:
+                bot.send_message(message.chat.id,f"Подождите около {len(places_list)} секунд.")
+            point_ans_name = ""
+            for i in np.arange(0, len(places_list), 1):
+                chosen_place = places_list[i]
+                chosen_place_data = locator.geocode(chosen_place)
+                place_latitude = chosen_place_data.latitude
+                place_longitude = chosen_place_data.longitude
+                place_data = (place_latitude, place_longitude)
+                from geopy import distance
+                distance_data = distance.distance(place_data, users_data)
+                if distance_data < ans_dist:
+                    ans_latitude = place_latitude
+                    ans_longitude = place_longitude
+                    ans_dist = distance_data
+                    point_ans_name = chosen_place
+            bot.send_location(message.chat.id, ans_latitude, ans_longitude)
+            if places_list==['Радунь']:
+                bot.send_message(message.chat.id,"Радунская поликлиника, Радунь")
+            elif places_list==['Кореличи']:
+                bot.send_message(message.chat.id, "Кореличская ЦРБ, Кореличи")
+            elif places_list==["Островец"]:
+                bot.send_message(message.chat.id,"Островецкая ЦРКБ, Островец")
+            elif places_list==['Кричевская Цетральная Районная Больница, Кричев, Беларусь']:
+                bot.send_message(message.chat.id,"Кричевская ЦРБ, Кричев")
+            elif places_list == ["Славгород, Беларусь"]:
+                bot.send_message(message.chat.id,"Славгородская ЦРБ, Беларусь")
+            elif places_list == ["Хотимская центральная районная больница, Хоцімск"]:
+                bot.send_message(message.chat.id,"Хотимская центральная районная больница, Хотимск")
+            elif places_list == ["Отделение Скорой Медицинской Помощи, Чаусы"]:
+                bot.send_message(message.chat.id,"Чаусская ЦРБ, Чаусы")
+            else:
+                bot.send_message(message.chat.id, point_ans_name)
+    else:
         if users_language==0:
-            bot.edit_message_text(chat_id=lang_call.message.chat.id, message_id=lang_call.message.message_id, text="Language was successfully changed.",
-                              reply_markup=None)
+            bot.send_message(message.chat.id,"Your input is wrong.")
         else:
-            bot.edit_message_text(chat_id=lang_call.message.chat.id, message_id=lang_call.message.message_id,
-                                  text="Язык был успешно изменен.",
-                                  reply_markup=None)
+            bot.send_message(message.chat.id,"Ваш ввод неверен.")
 #get list of places where you can make a coronavirus vaccine
 @bot.message_handler(commands=['vaccine'])
 def vaccine(message):
+    set_native_language(message.from_user.language_code)
     region_keyboard = types.ReplyKeyboardMarkup()
     brest_region_button = types.KeyboardButton(text="Брестская область")
     vitebsk_region_button = types.KeyboardButton(text="Витебская область")
@@ -144,6 +273,7 @@ def get_vaccine_information(message):
 #get coronavirus statistics
 @bot.message_handler(commands=['stat'])
 def statistics(message):
+    set_native_language(message.from_user.language_code)
     if users_language==0:
         bot.send_message(message.chat.id,"Send your full country's name in English.")
     else:
@@ -206,7 +336,7 @@ def choose_country(message):
     def stat_continue_acceptance(stat_call):
         if stat_call.data == "yes_stat":
             if users_language==0:
-                bot.send_message(stat_call.message.chat.id,"Send your full country's name on english.")
+                bot.send_message(stat_call.message.chat.id,"Send your full country's name in English.")
                 bot.register_next_step_handler(stat_call.message,choose_country)
             else:
                 bot.send_message(stat_call.message.chat.id, "Отправьте полное название Вашей страны на английском.")
@@ -219,6 +349,7 @@ def choose_country(message):
 #get my contacts
 @bot.message_handler(commands = ['author'])
 def author(message):
+    set_native_language(message.from_user.language_code)
     global users_language
     if users_language==0:
         bot.send_message(message.chat.id, "If you have any advices or you have any problems write on this email: fedarau@gmail.com.")
@@ -232,10 +363,10 @@ def author(message):
 #other cases
 @bot.message_handler(func  = lambda m: True)
 def base(message):
+    set_native_language(message.from_user.language_code)
     global users_language
     if users_language==0:
         bot.send_message(message.chat.id,"Your input is wrong.")
     else:
         bot.send_message(message.chat.id,"Ваш ввод неверен.")
-
 bot.polling(none_stop=True)
