@@ -73,7 +73,7 @@ async def stat(ctx,*args):
                         "Uk": "uk", "France": "france",
                         "Turkey": "turkey", "Argentina": "argentina", "Iran": "iran", "Colombia": "colombia",
                         "Spain": "spain", "Italy": "italy", "Indonesia": "indonesia",
-                        "Germany": "germany", "Mexico": "mexico", "Poland": "poland", "South africa": "south-africa",
+                        "Germany": "germany", "Mexico": "mexico", "Poland": "poland",
                         "Ukraine": "ukraine", "Peru": "peru",
                         "Philippines": "philippines", "Netherlands": "netherlands", "Iraq": "iraq",
                         "Malaysia": "malaysia", "Czechia": "czechia", "Chile": "chile",
@@ -82,7 +82,9 @@ async def stat(ctx,*args):
                         "Israel": "israel", "Lithuania": "lithuania", "Norway": "norway", "Latvia": "latvia",
                         "Estonia": "estonia", "China": "china", "Moldova": "moldova",
                         "Finland": "finland", "Denmark": "denmark", "Romania": "romania", "Bulgaria": "bulgaria",
-                        "Switzerland": "switzerland"}
+                        "Switzerland": "switzerland","Slovakia":"slovakia","Paraguay":"paraguay","Croatia":"croatia","Ireland":"ireland",'Palestine':"state-of-palestine",
+                        "Uganda":"uganda","Cyprus":"cyprus","Cambodia":"cambodia",'Serbia':"serbia","Portugal":"portugal","Cuba":"cuba","Morocco":"morocco","Kazakhstan":"kazakhstan","Vietnam":"viet-nam",
+                    "Jordan":"jordan","Hungary":"hungary","Nepal":"nepal","Austria":"austria","Uae":"united-arab-emirates","Greece":"greece",}
         date = str(datetime.date.today())
         country_name = str(args[0]).strip().strip("/").capitalize()
         if country_name in country_dict:
@@ -181,4 +183,4 @@ async def vaccine(ctx, *args):
                 await ctx.send("Ваш ввод неверен!")
                 await ctx.send(
                     "У нас только есть: \n!vaccine Бресткая область \n!vaccine Витебская область \n!vaccine Гомельская область \n!vaccine Гродненская область \n!vaccine Минская область \n!vaccine Могилевская область \n!vaccine г. Минск")
-bot.run(TOKEN)
+bot.run('ODg4NDQ4Mjc4NDMyMTkwNTA1.YUS18A.wzMytAP8047llHTe1ailQ6K3_KM')
