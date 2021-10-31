@@ -44,36 +44,45 @@ def geo_continue(message):
     if message.location!=None:
         from geopy import Nominatim
         global locator
-        locator = Nominatim(user_agent="myGeocoder")
+        locator = Nominatim(user_agent="coronaprojectbot")
         global users_latitude,users_longitude
         users_latitude = message.location.latitude
         users_longitude = message.location.longitude
-        users_geo_data = locator.reverse(f"{message.location.latitude}, {message.location.longitude}",language="ru").raw#53.9024716 27.5618225
-        users_country_code = users_geo_data['address']['country_code']
-        if users_country_code=="by":
-            region_keyboard = types.ReplyKeyboardMarkup()
-            brest_region_button = types.KeyboardButton(text="Брестская область")
-            vitebsk_region_button = types.KeyboardButton(text="Витебская область")
-            gomel_region_button = types.KeyboardButton(text="Гомельская область")
-            hrodna_region_button = types.KeyboardButton(text="Гродненская область")
-            minsk_region_button = types.KeyboardButton(text="Минская область")
-            mogilev_region_button = types.KeyboardButton(text="Могилевская область")
-            minsk_button = types.KeyboardButton(text="г. Минск")
-            region_keyboard.add(brest_region_button, vitebsk_region_button, gomel_region_button)
-            region_keyboard.add(hrodna_region_button, minsk_region_button, mogilev_region_button)
-            region_keyboard.add(minsk_button)
-            if users_language==0:
-                bot.send_message(message.chat.id,"Choose your region.",reply_markup=region_keyboard)
-            else:
-                bot.send_message(message.chat.id, "Выберите Вашу область.", reply_markup=region_keyboard)
-            bot.register_next_step_handler(message,geo_continue_1)
-        else:
-            if users_language==0:
-                bot.send_message(message.chat.id,"Sorry, this function works only in Belarus, yet.")
+        if locator.reverse(f"{message.location.latitude}, {message.location.longitude}",language="ru") is None:
+            if users_language == 0:
+                bot.send_message(message.chat.id, "Sorry, this function works only in Belarus, yet.")
             else:
                 bot.send_message(message.chat.id, "Извините, эта функция работает пока только в Беларуси.")
             non_keyboard = types.ReplyKeyboardRemove(selective=False)
             bot.send_message(message.chat.id, "Ok.", reply_markup=non_keyboard)
+        else:
+            users_geo_data = locator.reverse(f"{message.location.latitude}, {message.location.longitude}",
+                                             language="ru").raw  # 53.9024716 27.5618225
+            users_country_code = users_geo_data['address']['country_code']
+            if users_country_code == "by":
+                region_keyboard = types.ReplyKeyboardMarkup()
+                brest_region_button = types.KeyboardButton(text="Брестская область")
+                vitebsk_region_button = types.KeyboardButton(text="Витебская область")
+                gomel_region_button = types.KeyboardButton(text="Гомельская область")
+                hrodna_region_button = types.KeyboardButton(text="Гродненская область")
+                minsk_region_button = types.KeyboardButton(text="Минская область")
+                mogilev_region_button = types.KeyboardButton(text="Могилевская область")
+                minsk_button = types.KeyboardButton(text="г. Минск")
+                region_keyboard.add(brest_region_button, vitebsk_region_button, gomel_region_button)
+                region_keyboard.add(hrodna_region_button, minsk_region_button, mogilev_region_button)
+                region_keyboard.add(minsk_button)
+                if users_language == 0:
+                    bot.send_message(message.chat.id, "Choose your region.", reply_markup=region_keyboard)
+                else:
+                    bot.send_message(message.chat.id, "Выберите Вашу область.", reply_markup=region_keyboard)
+                bot.register_next_step_handler(message, geo_continue_1)
+            else:
+                if users_language == 0:
+                    bot.send_message(message.chat.id, "Sorry, this function works only in Belarus, yet.")
+                else:
+                    bot.send_message(message.chat.id, "Извините, эта функция работает пока только в Беларуси.")
+                non_keyboard = types.ReplyKeyboardRemove(selective=False)
+                bot.send_message(message.chat.id, "Ok.", reply_markup=non_keyboard)
     else:
         non_keyboard = types.ReplyKeyboardRemove(selective=False)
         bot.send_message(message.chat.id, "Ok.", reply_markup=non_keyboard)
@@ -83,46 +92,35 @@ def geo_continue_1(message):
     non_keyboard = types.ReplyKeyboardRemove(selective=False)
     bot.send_message(message.chat.id, "Ok.", reply_markup=non_keyboard)
     if message.text in regions_list:
-        if message.text=="г. Минск":
-            pass#смотрим по районам
+        inProgressList = ["г. Минск", "Брестская область","Витебская область","Минская область"]
+        if message.text in inProgressList:
+            if users_language == 0:
+                bot.send_message(message.chat.id,"This function is only in BETA and it is working only in Belarus in Grodno region, Mogilev region and Gomel region.")
+            else:
+                bot.send_message(message.chat.id,"Эта функция находится в БЕТЕ и работает только в Беларуси в Гродненской, Гомельской и Могилевской областях.")
         else:
             import numpy as np
             places_list = np.array([])
             cities_list = np.array([])
             if message.text=="Гродненская область":
                 cities_list = np.array(["Гродно","Большая Берестовица","Волковыск","Вороново, Беларусь","Дятлово","Зельва","Ивье",'Лида, Беларусь',"Радунь","Кореличи","Мосты, Гродненская область, Беларусь","Новогрудок","Островец","Ошмяны","Свислочь","Щучин, Беларусь","Сморгонь","Слоним"])
-                places_list = np.array([["Центральная городская поликлиника, Гродно","Городская поликлиника №3, Гродно","Городская поликлиника №4, Гродно","Городская поликлиника №5, Гродно","Городская поликлиника №6, Гродно","Городская поликлиника №7, Гродно"],["Берестовицкая центральная районная больница, Большая Берестовица"],["Центральная районная больница, Волковыск"],["Вороновская центральная районная больница, Вороново"],
+                places_list = np.array([["Центральная городская поликлиника, Гродно","Городская поликлиника №3, Гродно","Городская поликлиника № 4, Гродно","Городская поликлиника №5, Гродно","Городская поликлиника № 6, Гродно","Городская поликлиника № 7, Гродно"],["Берестовицкая центральная районная больница, Большая Берестовица"],["Центральная районная больница, Волковыск"],["Вороновская центральная районная больница, Вороново"],
                                         ["Дятловская центральная районная больница, Дятлово"],["Зельвенская центральная районная больница, Зельва"],["Ивьевская центральная районная больница,Ивье"],["Лидская центральная районная больница, Лида", "Городская поликлиника №1, Лида"],["Радунь"],
                                         ["Кореличи"],["Центральная районная больница, Мосты, Гродненская область"],["Новогрудская ЦРБ, Новогрудок"],["Островец"],["Ошмянская центральная районная больница, Ошмяны"],["Свислочская Центральная районная больница, Свислочь"],["Щучинская центральная районная больница, Щучин"],["Сморгонская Центральная районная больница, Сморгонь"],["Слонимская центральная районная больница, Слоним"]])
             elif message.text=="Могилевская область":
-                cities_list = np.array(["Белыничи","Быхов","Глуск","Горки, Беларусь","Дрибин","Кировск, Беларусь","Климовичи","Кличев, Беларусь","Костюковичи","Краснополье, Беларусь","Кричев","Круглое, Беларусь","Мстиславль","Осиповичи","Славгород, Беларусь","Хоцімск","Чаусы","Чериков","Шклов","Могилев"])
+                cities_list = np.array(["Белыничи","Быхов","Глуск","Горки, Беларусь","Дрибин","Кировск, Беларусь","Климовичи","Кличев, Беларусь","Костюковичи","Краснополье, Беларусь","Кричев","Круглое, Беларусь","Мстиславль","Осиповичи","Славгород, Беларусь","Хоцімск","Чаусы","Чериков","Шклов","Могилёв"])
                 places_list = np.array([["Белыничская центральная районная больница, Белыничи"],["Быховская центральная районная больница, Быхов"],["Глусская ЦРБ, Глуск"],["Горецкая центральная районная больница, Горки , Беларусь"],["Поликлиника, Дрибин"],["ЦРБ, Кировск, Беларусь"],["Климовическая районная поликлиника, Климовичи"],["Районная больница, Кличев, Беларусь"],["Больница, Костюковичи"],["ЦРБ, Краснополье, Беларусь"]
                                            ,["Кричевская Цетральная Районная Больница, Кричев, Беларусь"],["Круглянская больница, Круглое, Беларусь"],["Мстиславльская центральная районная больница, Мстиславль"],["Осиповичская центральная районная больница, Осиповичи"],["Славгород, Беларусь"],["Хотимская центральная районная больница, Хоцімск"],["Отделение Скорой Медицинской Помощи, Чаусы"],["Чериковская центральная районная больница, Чериков"],
-                                        ["""УЗ "Шкловская ЦРБ", Шклов"""],[""]])
-            else:
-                cities_list = np.array(
-                    ["Гродно", "Большая Берестовица", "Волковыск", "Вороново, Беларусь", "Дятлово", "Зельва", "Ивье",
-                     'Лида, Беларусь', "Радунь", "Кореличи", "Мосты, Гродненская область, Беларусь", "Новогрудок",
-                     "Островец", "Ошмяны", "Свислочь", "Щучин, Беларусь", "Сморгонь", "Слоним"])
-                places_list = np.array([["Центральная городская поликлиника, Гродно",
-                                         "Городская поликлиника №3, Гродно", "Городская поликлиника №4, Гродно",
-                                         "Городская поликлиника №5, Гродно", "Городская поликлиника №6, Гродно",
-                                         "Городская поликлиника №7, Гродно"],
-                                        ["Берестовицкая центральная районная больница, Большая Берестовица"],
-                                        ["Центральная районная больница, Волковыск"],
-                                        ["Вороновская центральная районная больница, Вороново"],
-                                        ["Дятловская центральная районная больница, Дятлово"],
-                                        ["Зельвенская центральная районная больница, Зельва"],
-                                        ["Ивьевская центральная районная больница,Ивье"],
-                                        ["Лидская центральная районная больница, Лида",
-                                         "Городская поликлиника №1, Лида"], ["Радунь"],
-                                        ["Кореличи"], ["Центральная районная больница, Мосты, Гродненская область"],
-                                        ["Новогрудская ЦРБ, Новогрудок"], ["Островец"],
-                                        ["Ошмянская центральная районная больница, Ошмяны"],
-                                        ["Свислочская Центральная районная больница, Свислочь"],
-                                        ["Щучинская центральная районная больница, Щучин"],
-                                        ["Сморгонская Центральная районная больница, Сморгонь"],
-                                        ["Слонимская центральная районная больница, Слоним"]])
+                                        ["""УЗ "Шкловская ЦРБ", Шклов"""],["Могилевский городской травмпункт, Могилёв","Магілёўская паліклініка №2, Могилёв","улица Тишки Гартного, Могилёв","Поликлиника №4, Могилёв","Амбулатория, Могилёв","Могилёвская поликлиника № 6, Могилёв","Поликлиника №7, Могилёв"]])
+            elif message.text == "Гомельская область":
+                cities_list = np.array(["Добруш","Ельск","Житковичи","Жлобин","Калинковичи","Корма","Лельчицы","Лоев","Наровля","Октябрьский, Беларусь","Петриков","Речица","Рогачёв",
+                                        "Светлогорск, Беларусь","Хойники","Чечерск","Брагин","Буда-Кошелёво","Ветка","Мозырь","Гомель"])
+                places_list = np.array([["Больница, Добруш"],["Црб, Ельск"],["Больничный, Житковичи"],["Больница, Жлобин"],["Районная поликлиника, Калинковичи"],["Кормянская ЦРБ, Корма"],["Больница, Лельчицы"],["Больница, Лоев"],
+                                        ["Наровлянская центральная районная больница, Наровля"],["Октябрьская ЦРБ, Октябрьский, Беларусь"],["Петриковская центральная районная больница, Петриков"],["Станция скорой медицинской помощи, Речица"],
+                                        ["Больница, Рогачёв"],["Центральная районная больница, Светлогорск, Беларусь"],["Больница, Хойники"],["Чечерская центральная районная больница, Чечерск"],
+                                        ["""Учреждение здравоохранения "Брагинская ЦРБ", Брагин"""],["Больница, Буда-Кошелёво"],["Ветковская районная больница, Ветка"],["""УЗ "Мозырская ЦГП", Мозырь""","Поликлиника №2 г.Мозырь, Мозырь"],
+                                        ["Поликлиника № 8 клиническая областная, Гомель","Городская центральная поликлиника №1, Гомель", "Поликлиника № 1, Гомель","Поликлиника №12, Гомель","""Филиал № 3 ГУЗ "Гомельская центральная городская поликлиника", Гомель""", """Филиал № 4 ГУЗ "Гомельская центральная городская поликлиника", Гомель""","Поликлиника № 5, Гомель","Фармация # 1/1, Гомель",
+                                         "Детская поликлиника №4, Гомель","Поликлиника № 9, Гомель","Поликлиника №10, Гомель","Филиал №11, Гомель","Гомельская центральная городская поликлиника филиал 12, Гомель"]])
             cities_ans_dist = 10000.0
             cities_ans_name=2
             if users_language == 0:
@@ -179,7 +177,21 @@ def geo_continue_1(message):
             elif places_list == ["Отделение Скорой Медицинской Помощи, Чаусы"]:
                 bot.send_message(message.chat.id,"Чаусская ЦРБ, Чаусы")
             else:
-                bot.send_message(message.chat.id, point_ans_name)
+                if point_ans_name == "Могилевский городской травмпункт, Могилёв":
+                    bot.send_message(message.chat.id, "Могилёвская центральная поликлиника, Могилёв")
+                elif point_ans_name == "улица Тишки Гартного, Могилёв":
+                    bot.send_message(message.chat.id,"Могилевская поликлиника №3, Могилёв")
+                elif point_ans_name == "Больничный, Житковичи":
+                    bot.send_message(message.chat.id,"Житковичская ЦРБ, Житковичи")
+                elif point_ans_name == "Станция скорой медицинской помощи, Речица":
+                    bot.send_message(message.chat.id,"Речицкая ЦРБ, Речица")
+                elif point_ans_name == "Фармация # 1/1, Гомель":
+                    bot.send_message(message.chat.id, """Государственное учреждение здравоохранения «Гомельская центральная городская клиническая поликлиника» филиал № 6, Гомель""")
+                elif point_ans_name == "Детская поликлиника №4, Гомель":
+                    bot.send_message(message.chat.id,
+                                     """Государственное учреждение здравоохранения «Гомельская центральная городская клиническая поликлиника» филиал № 8, Гомель""")
+                else:
+                    bot.send_message(message.chat.id, point_ans_name)
     else:
         if users_language==0:
             bot.send_message(message.chat.id,"Your input is wrong.")
@@ -287,8 +299,22 @@ def choose_country(message):
                     "Philippines":"philippines","Netherlands":"netherlands","Iraq":"iraq","Malaysia":"malaysia","Czechia":"czechia","Chile":"chile",
                     "Japan":"japan","Bangladesh":"bangladesh","Canada":"canada","Thailand":"thailand","Belgium":"belgium","Sweden":"sweden",
                     "Israel":"israel","Lithuania":"lithuania","Norway":"norway","Latvia":"latvia","Estonia":"estonia","China":"china","Moldova":"moldova",
-                    "Finland":"finland","Denmark":"denmark","Romania":"romania","Bulgaria":"bulgaria","Switzerland":"switzerland"}
-    country_name = str(message.text).strip().strip("/").capitalize()
+                    "Finland":"finland","Denmark":"denmark","Romania":"romania","Bulgaria":"bulgaria","Switzerland":"switzerland","Pakistan":"pakistan",
+                    'Serbia':"serbia","Portugal":"portugal","Cuba":"cuba","Morocco":"morocco","Kazakhstan":"kazakhstan","Vietnam":"viet-nam",
+                    "Jordan":"jordan","Hungary":"hungary","Nepal":"nepal","Austria":"austria","Uae":"united-arab-emirates","Greece":"greece",
+                    "Tunisia":"tunisia","Georgia":"georgia","Lebanon":"lebanon","Guatemala":"guatemala","Costa rica":"costa-rica","Saudi arabia":"saudi-arabia",
+                    "Sri lanka":"sri-lanka","Azerbaijan":"azerbaijan","Ecuador":"ecuador","Bolivia":"bolivia","Myanmar":"myanmar","Panama":"panama",
+                    "Slovakia":"slovakia","Paraguay":"paraguay","Croatia":"croatia","Ireland":"ireland",'Palestine':"state-of-palestine","Kuwait":"kuwait",
+                    "Venezuela":"venezuela","Uruguay":"uruguay","Dominican republic":"dominican-republic","Honduras":"honduras","Ethiopia":"ethiopia",
+                    "South korea":"south-korea","Libya":"libya","Mongolia":"mongolia","Egypt":"egypt","Slovenia":"slovenia",'Oman':"oman","Armenia":"armenia",
+                    "Bahrain":"bahrain","Kenya":"kenya","Bosnia and herzegovina":"bosnia-and-herzegovina","Qatar":"qatar","Nigeria":"nigeria",
+                    "Zambia":"zambia","Algeria":"algeria","North macedonia":"macedonia","Botswana":"botswana",'Uzbekistan':"uzbekistan",
+                    "Singapore":"singapore","Albania":"albania","Kyrgyzstan":"kyrgyzstan","Australia":"australia","Afghanistan":"afghanistan",
+                    "Mozambique":"mozambique","Montenegro":"montenegro","Zimbabwe":"zimbabwe","Ghana":"ghana","Namibia":"namibia",
+                    "Uganda":"uganda","Cyprus":"cyprus","Cambodia":"cambodia","El salvador":"el-salvador","Cameroon":"cameroon",
+                    "Rwanda":"rwanda","Jamaica":"jamaica","Maldives":"maldives","Luxembourg":"luxembourg","Senegal":"senegal","Angola":"angola",
+                    "Malawi":"malawi","Ivory coast":"cote-d-ivoire"}#started with South Korea(beginning--switzerland)
+    country_name = str(message.text).replace("_"," ").strip().strip("/").capitalize()
     if country_name in country_dict:
         country_information = str(requests.get(f"https://www.worldometers.info/coronavirus/country/{country_dict[country_name]}/").content)
         cases_index = country_information.find('Coronavirus Cases:')
@@ -319,10 +345,22 @@ def choose_country(message):
         for i in country_dict:
             similar_dict[i] = similar(message.text, i)
         sorted_dict = dict(sorted(similar_dict.items(), key=lambda item: item[1], reverse=True))
+        sorted_dict_to_list = list(sorted_dict.keys())
+        final_list = []
+        for countryName in sorted_dict_to_list[:3]:
+            if " " in countryName:
+                countryNameList = [i.capitalize() for i in countryName.split()]
+                finalCountryName = ""
+                for word in countryNameList:
+                    finalCountryName+=word+"_"
+                finalCountryName = finalCountryName.strip("_")
+                final_list.append(finalCountryName)
+            else:
+                final_list.append(countryName)
         if users_language==0:
-            bot.send_message(message.chat.id,f"Your input is wrong or we don't have information about this country. Maybe you meant: \n/{list(sorted_dict.keys())[0]} \n/{list(sorted_dict.keys())[1]} \n/{list(sorted_dict.keys())[2]}")
+            bot.send_message(message.chat.id,f"Your input is wrong or we don't have information about this country. Maybe you meant: \n/{final_list[0]} \n/{final_list[1]} \n/{final_list[2]}")
         else:
-            bot.send_message(message.chat.id,f"Ваш ввод неверен либо у нас нет информации об этой стране. Возможно Вы имели в виду: \n/{list(sorted_dict.keys())[0]} \n/{list(sorted_dict.keys())[1]} \n/{list(sorted_dict.keys())[2]}")
+            bot.send_message(message.chat.id,f"Ваш ввод неверен либо у нас нет информации об этой стране. Возможно Вы имели в виду: \n/{final_list[0]} \n/{final_list[1]} \n/{final_list[2]}")
     stat_continue_keyboard = types.InlineKeyboardMarkup()
     yes_stat_continue_but=types.InlineKeyboardButton(text="☑️",callback_data="yes_stat")
     no_stat_continue_but = types.InlineKeyboardButton(text="❌",callback_data="no_stat")
