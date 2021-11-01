@@ -183,4 +183,5 @@ async def vaccine(ctx, *args):
                 await ctx.send("Ваш ввод неверен!")
                 await ctx.send(
                     "У нас только есть: \n!vaccine Бресткая область \n!vaccine Витебская область \n!vaccine Гомельская область \n!vaccine Гродненская область \n!vaccine Минская область \n!vaccine Могилевская область \n!vaccine г. Минск")
-bot.run('ODg4NDQ4Mjc4NDMyMTkwNTA1.YUS18A.wzMytAP8047llHTe1ailQ6K3_KM')
+import config
+bot.run(config.TOKEN)
