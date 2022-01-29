@@ -10,6 +10,6 @@ There are some functions:
 
 3) Also we have C-H Messenger, which has NO CACHE on your phone and works with full speed and secure.
 
-Also there are some more info on our site coronavirushelper.herokuapp.com, where you can download our apps.
+Also there are some more info on our site https://coronavirushelper.herokuapp.com, where you can download our apps.
 
 ## Good luck and be healthy!
