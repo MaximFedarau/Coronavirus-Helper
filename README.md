@@ -1,5 +1,7 @@
 <h1 align="center">Coronavirus-Helper</h1>
 
+<p align="center"><b>Disclaimer: this is a project for a school competition.<b><p align="center">
+
 Coronavirus-Helper - is a service, where you can find information about Covid-19.
 
 - [x] Using our Telegram Bot you can find the nearest vaccination point.
